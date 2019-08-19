@@ -24,25 +24,37 @@ async function indexPages([path, page]: [string, PageModule|RecursiveRecord<Page
     {
         return (await Promise.all(
             Object.entries(page)
-                .map(e => [ path + "/" + transformPagename(e[0]), e[1] ] as typeof e)
+                .map(e => [ buildPath(path, e[0]), e[1] ] as typeof e)
                 .flatMap(async e => await indexPages(e))
         )).flat()
     }
 }
 
-function transformPagename(pagename: string): string
+function buildPath(path: string, pagename: string): string
 {
-    if (pagename.startsWith("_") && pagename.endsWith("_"))
+    if (!path.endsWith(")")) path += "/";
+
+    if (pagename.startsWith("$"))
     {
-        return ":" + pagename.slice(1, pagename.length - 1);
+        return path + ":" + pagename.slice(1);
+    }
+
+    if (pagename.startsWith("§"))
+    {
+        return path + "*" + pagename.slice(1);
+    }
+
+    if (pagename.startsWith("_"))
+    {
+        return path + "(" + buildPath("", pagename.slice(1)).slice(1) + "/)";
     }
 
     if (pagename === "index")
     {
-        return "";
+        return path;
     }
 
-    return pagename;
+    return path + pagename;
 }
 
 async function main()
