@@ -81,3 +81,57 @@ export interface RecursiveRecord<T> extends _RecursiveRecord<T>
 {
 }
 
+export async function indexModules<T, K>(
+    module: T|RecursiveRecord<T>,
+    checker: (module: any) => module is T,
+    transformer: (path: string, module: T) => K[]
+) {
+    return _indexModules(["", module], checker, transformer);
+}
+
+async function _indexModules<T, K>(
+    [path, module]: [string, T|RecursiveRecord<T>],
+    checker: (module: any) => module is T,
+    transformer: (path: string, module: T) => K[]
+): Promise<K[]>
+{
+    if (checker(module))
+    {
+        return transformer(path, module);
+    }
+    else
+    {
+        return (await Promise.all(
+            Object.entries(module)
+                .map(e => [ buildPath(path, e[0]), e[1] ] as typeof e)
+                .flatMap(async e => await _indexModules(e, checker, transformer))
+        )).flat()
+    }
+}
+
+function buildPath(path: string, pagename: string): string
+{
+    if (!path.endsWith(")")) path += "/";
+
+    if (pagename.startsWith("$"))
+    {
+        return path + ":" + pagename.slice(1);
+    }
+
+    if (pagename.startsWith("§"))
+    {
+        return path + "*" + pagename.slice(1);
+    }
+
+    if (pagename.startsWith("_"))
+    {
+        return path + "(" + buildPath("", pagename.slice(1)).slice(1) + "/)";
+    }
+
+    if (pagename === "index")
+    {
+        return path;
+    }
+
+    return path + pagename;
+}

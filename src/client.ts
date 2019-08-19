@@ -1,6 +1,6 @@
 import pageModules, { PageModule, isPageModule } from "./pages";
 import Route from "route-parser";
-import { RecursiveRecord } from "./libs/utils";
+import { RecursiveRecord, indexModules } from "./libs/utils";
 
 interface Page 
 {
@@ -10,56 +10,14 @@ interface Page
 }
 
 
-async function indexPages([path, page]: [string, PageModule|RecursiveRecord<PageModule>]): Promise<Page[]>
-{
-    if (isPageModule(page))
-    {
-        return [{
-            path,
-            route: new Route(path),
-            create: (target: HTMLElement) => new page.default({target})
-        } as Page]
-    }
-    else
-    {
-        return (await Promise.all(
-            Object.entries(page)
-                .map(e => [ buildPath(path, e[0]), e[1] ] as typeof e)
-                .flatMap(async e => await indexPages(e))
-        )).flat()
-    }
-}
-
-function buildPath(path: string, pagename: string): string
-{
-    if (!path.endsWith(")")) path += "/";
-
-    if (pagename.startsWith("$"))
-    {
-        return path + ":" + pagename.slice(1);
-    }
-
-    if (pagename.startsWith("§"))
-    {
-        return path + "*" + pagename.slice(1);
-    }
-
-    if (pagename.startsWith("_"))
-    {
-        return path + "(" + buildPath("", pagename.slice(1)).slice(1) + "/)";
-    }
-
-    if (pagename === "index")
-    {
-        return path;
-    }
-
-    return path + pagename;
-}
-
 async function main()
 {
-    const pages = await indexPages(["", pageModules]);
+    const pages = await indexModules(pageModules, isPageModule, (path, module) => [{
+        path,
+        route: new Route(path),
+        create: (target: HTMLElement) => new module.default({target})
+    } as Page]);
+
     const page = pages.find(page => page.route.match(location.pathname));
 
     if (page) {
@@ -73,18 +31,3 @@ async function main()
 }
 
 main();
-/*
-
-const path = location.pathname.split("/");
-let pagename = path[1] == "" 
-    ? "index" 
-    : !!pages[path[1]]
-        ? path[1]
-        : "404";
-
-console.log(pagename);
-
-const app = new pages[pagename].default({
-    target: document.body
-})
-*/

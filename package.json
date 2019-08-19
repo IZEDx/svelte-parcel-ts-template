@@ -15,11 +15,22 @@
     "build-client": "cross-env NODE_ENV=production parcel build src/index.html --public-url . --out-dir ./dist/client/ ",
     "dev-server": "parcel watch src/server.ts --public-url . --out-dir ./dist/  --target node",
     "dev-client": "parcel watch src/index.html --public-url . --out-dir ./dist/client/",
-    "clear": "rm -rf dist"
+    "clear": "npm run clear-cache && npm run clear-dist",
+    "clear-cache": "rm -rf .cache",
+    "clear-dist": "rm -rf dist"
   },
   "browserslist": [
     "last 1 chrome versions"
   ],
+  "staticFiles": {
+      "staticPath": [
+          {
+              "outDirPattern": "**/client",
+              "staticPath": "src/assets",
+              "staticOutDir": "assets"
+          }
+      ]
+},
   "dependencies": {
     "axios-cache-adapter": "^2.3.3",
     "chalk": "^2.4.2",
@@ -37,6 +48,7 @@
     "concurrently": "^4.1.1",
     "cross-env": "^5.2.0",
     "parcel-bundler": "^1.8.1",
+    "parcel-plugin-static-files-copy": "^2.2.1",
     "parcel-plugin-svelte": "^4.0.2",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "sass": "^1.22.10",
