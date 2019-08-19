@@ -73,4 +73,11 @@ export function randomSequence(length: number) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
   
     return text;
-  }
+}
+
+
+type _RecursiveRecord<T> = Record<string, T|RecursiveRecord<T>>;
+export interface RecursiveRecord<T> extends _RecursiveRecord<T>
+{
+}
+

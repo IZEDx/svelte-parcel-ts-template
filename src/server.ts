@@ -17,11 +17,27 @@ export async function main()
     const server    = createServer(app);
     const cache     = setupCache({ maxAge: 15 * 60 * 1000 });
     const axios     = TypedAxios.create({ adapter: cache.adapter as any });
+    const statics = serveStatic(path("client"), {index: ["index.html"]});
+    const staticFileEndings = [".css", ".js", ".html", ".map"]
 
-    app.use(serveStatic(path("client"), {index: ["index.html"]}));
     app.use(urlencoded({ extended: true })); 
     app.use(json());
-    app.use(function(req, res) {
+    app.use((req, res, next) => {
+        
+        const assetsIdx = req.url.indexOf("/assets/");
+        if (assetsIdx >= 0)
+        {
+            req.url = req.url.substring(assetsIdx);
+        }
+        if (staticFileEndings.find(e => req.url.endsWith(e)))
+        {
+            req.url = req.url.substring(req.url.lastIndexOf("/"));
+        }
+        
+        next();
+    });
+    app.use(statics);
+    app.use((req, res) => {
         res.sendFile(path("client", "index.html"));
     });
 
