@@ -24,3 +24,8 @@ declare module "*.svelte" {
   
     export default component;
 }
+
+declare module "*.ts"
+{
+
+}

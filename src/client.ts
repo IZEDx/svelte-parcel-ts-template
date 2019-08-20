@@ -1,6 +1,6 @@
-import pageModules, { PageModule, isPageModule } from "./pages";
 import Route from "route-parser";
 import { RecursiveRecord, indexModules } from "./libs/utils";
+import _modules from "./pages/**/*.svelte";
 
 interface Page 
 {
@@ -8,6 +8,23 @@ interface Page
     route: Route;
     create: (target: HTMLElement) => SvelteComponent<{}>;
 }
+
+interface PageProps
+{
+
+}
+
+type PageModule = {
+    default: SvelteComponent<PageProps>
+};
+
+function isPageModule(obj: any): obj is PageModule
+{
+    return !!obj && !!obj.default && obj.default.name === "Component";
+} 
+
+const pageModules = _modules as unknown as RecursiveRecord<PageModule>;
+
 
 
 async function main()

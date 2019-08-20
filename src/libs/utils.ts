@@ -53,16 +53,16 @@ export namespace log {
      * @param {string} prefix The prefix to prepend.
      * @param {string[]} msg The actual message.
      */
-    function logPrefix(prefix: string, ...msg: string[]) {
+    function logPrefix(prefix: string, ...msg: any[]) {
         console.log(prefix + "\t" + chalk.gray(time.local()) + "\t", ...msg);
     }
 
-    export const main           = (...msg: string[]) => logPrefix(chalk.red.bold("["+ name +"]"), ...msg);
-    export const error           = (...msg: string[]) => logPrefix(chalk.red.bold("[ERROR]"), ...msg);
-    export const server         = (...msg: string[]) => logPrefix(chalk.blue.bold("[Server]"), ...msg);
-    export const interaction    = (...msg: string[]) => logPrefix(chalk.green.bold("[Interaction]"), ...msg);
-    export const debug          = (...msg: string[]) => logPrefix(chalk.yellow.bold("[Debug]"), ...msg);
-    export const test          = (...msg: string[]) => logPrefix(chalk.green.bold("[Test]"), ...msg);
+    export const main           = (...msg: any[]) => logPrefix(chalk.red.bold("["+ name +"]"), ...msg);
+    export const error           = (...msg: any[]) => logPrefix(chalk.red.bold("[ERROR]"), ...msg);
+    export const server         = (...msg: any[]) => logPrefix(chalk.blue.bold("[Server]"), ...msg);
+    export const interaction    = (...msg: any[]) => logPrefix(chalk.green.bold("[Interaction]"), ...msg);
+    export const debug          = (...msg: any[]) => logPrefix(chalk.yellow.bold("[Debug]"), ...msg);
+    export const test          = (...msg: any[]) => logPrefix(chalk.green.bold("[Test]"), ...msg);
 }
 
 export function randomSequence(length: number) {
@@ -101,12 +101,15 @@ async function _indexModules<T, K>(
     }
     else
     {
-        return (await Promise.all(
-            Object.entries(module)
-                .map(e => [ buildPath(path, e[0]), e[1] ] as typeof e)
-                .flatMap(async e => await _indexModules(e, checker, transformer))
-        )).flat()
+        const entries = Object.entries(module).map(e => [ buildPath(path, e[0]), e[1] ] as typeof e);
+        const promises = entries.map(async e => await _indexModules(e, checker, transformer));
+        return entries.length === 0 ? [] : flatten(await Promise.all(promises));
     }
+}
+
+export function flatten<T>(arr: T[][])
+{
+    return arr.reduce((p, v) => [...p, ...v], [] as T[]);
 }
 
 function buildPath(path: string, pagename: string): string
