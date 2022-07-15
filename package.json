@@ -52,7 +52,7 @@
     "parcel-plugin-svelte": "^4.0.2",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "sass": "^1.22.10",
-    "svelte": "^3.5.1",
+    "svelte": "^3.49.0",
     "svelte-preprocess": "^2.15.1",
     "typescript": "^3.5.3"
   }
