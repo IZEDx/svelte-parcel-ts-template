@@ -34,7 +34,7 @@
   "dependencies": {
     "axios-cache-adapter": "^2.3.3",
     "chalk": "^2.4.2",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "pretty-json-stringify": "0.0.2",
     "restyped-axios": "^2.0.0",
     "restyped-express-async": "^0.6.1",
